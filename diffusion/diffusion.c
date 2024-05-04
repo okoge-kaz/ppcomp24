@@ -44,6 +44,7 @@ void calc(int nt) {
     // fflush(0);
 #endif
 
+    #pragma omp parallel for private(x)
     for (y = 1; y < NY - 1; y++) {
       for (x = 1; x < NX - 1; x++) {
         data[to][y][x] = 0.2 * (data[from][y][x] + data[from][y][x - 1] + data[from][y][x + 1] + data[from][y - 1][x] + data[from][y + 1][x]);
@@ -69,6 +70,17 @@ int main(int argc, char *argv[]) {
   calc(nt);
 
   gettimeofday(&t2, NULL);
+
+  // debug
+  printf("data[0][0][NX / 2]=%f\n", data[0][0][NX / 2]);
+  printf("data[0][0][NX / 2 - 5000]=%f\n", data[0][0][NX / 2 - 5000]);
+  printf("data[0][0][NX / 2 + 5000]=%f\n", data[0][0][NX / 2 + 5000]);
+  printf("data[0][1000][NX / 2]=%f\n", data[0][1000][NX / 2]);
+  printf("data[0][1000][NX / 2 - 5000]=%f\n", data[0][1000][NX / 2 - 5000]);
+  printf("data[0][1000][NX / 2 + 5000]=%f\n", data[0][1000][NX / 2 + 5000]);
+  printf("data[1][2000][NX / 2]=%f\n", data[1][2000][NX / 2]);
+  printf("data[1][2000][NX / 2 - 5000]=%f\n", data[1][2000][NX / 2 - 5000]);
+  printf("data[1][2000][NX / 2 + 5000]=%f\n", data[1][2000][NX / 2 + 5000]);
 
   {
     double us;
