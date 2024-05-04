@@ -77,8 +77,16 @@ int sort(double *data, int s, int e) {
   /* Here, "i" is boundary of 2 parts */
 
   /* call sort() recursively */
-  sort(data, s, i); /* sort data[s] ... data[i-1] */
-  sort(data, i, e); /* sort data[i] ... data[e-1] */
+  if (e - s < 1000) {
+    sort(data, s, i); /* sort data[s] ... data[i-1] */
+    sort(data, i, e); /* sort data[i] ... data[e-1] */
+  } else {
+#pragma omp task shared(data)
+    sort(data, s, i); /* sort data[s] ... data[i-1] */
+#pragma omp task shared(data)
+    sort(data, i, e); /* sort data[i] ... data[e-1] */
+#pragma omp taskwait
+  }
 
   return 0;
 }
@@ -119,7 +127,11 @@ int main(int argc, char *argv[]) {
     init(data, n);
     /*print(data, n);*/
     gettimeofday(&st, NULL); /* get start time */
-    sort(data, 0, n);
+#pragma omp parallel
+    {
+#pragma omp single
+      sort(data, 0, n);
+    }
     gettimeofday(&et, NULL); /* get start time */
     us = time_diff_us(st, et);
 

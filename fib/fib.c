@@ -2,47 +2,52 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-long time_diff_us(struct timeval st, struct timeval et)
-{
-    return (et.tv_sec-st.tv_sec)*1000000+(et.tv_usec-st.tv_usec);
+long time_diff_us(struct timeval st, struct timeval et) {
+  return (et.tv_sec - st.tv_sec) * 1000000 + (et.tv_usec - st.tv_usec);
 }
 
-long fib(int n)
-{
-    long f1, f2;
-    if (n <= 1) return n;
+long fib(int n) {
+  long f1, f2;
+  if (n <= 1) return n;
 
-    f1 = fib(n-1);
-    f2 = fib(n-2);
-
-    return f1+f2;
+  if (n <= 30) {
+    f1 = fib(n - 1);
+    f2 = fib(n - 2);
+  }
+  else {
+  #pragma omp task shared(f1)
+    f1 = fib(n - 1);
+  #pragma omp task shared(f2)
+    f2 = fib(n - 2);
+  #pragma omp taskwait
+  }
+  return f1 + f2;
 }
 
-int main(int argc, char *argv[])
-{
-    int n = 30;
-    long ans;
-    int i;
+int main(int argc, char *argv[]) {
+  omp_set_num_threads(4);
+  int n = 30;
+  long ans;
+  int i;
 
-    if (argc >= 2) {
-        n = atoi(argv[1]);
-    }
+  if (argc >= 2) {
+    n = atoi(argv[1]);
+  }
 
-    for (i = 0; i < 3; i++) {
-        struct timeval st;
-        struct timeval et;
-        long us;
-        double res;
+  for (i = 0; i < 3; i++) {
+    struct timeval st;
+    struct timeval et;
+    long us;
+    double res;
 
-        gettimeofday(&st, NULL); /* get start time */
-        ans = fib(n);
-        gettimeofday(&et, NULL); /* get start time */
-        us = time_diff_us(st, et);
+    gettimeofday(&st, NULL); /* get start time */
+    ans = fib(n);
+    gettimeofday(&et, NULL); /* get start time */
+    us = time_diff_us(st, et);
 
-        printf("fib(%d) = %ld: fib took %ld us\n",
-               n, ans, us);
+    printf("fib(%d) = %ld: fib took %ld us\n",
+           n, ans, us);
+  }
 
-    }
-
-    return 0;
+  return 0;
 }
