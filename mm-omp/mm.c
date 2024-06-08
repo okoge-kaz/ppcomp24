@@ -55,18 +55,21 @@ int main(int argc, char *argv[])
 
     /* setup matrix (column major) */
     /* A is m*k matrix */
+#pragma omp parallel for private(i)
     for (j = 0; j < k; j++) {
         for (i = 0; i < m; i++) {
             A[i+j*m] = 1.0;
         }
     }
     /* B is k*n matrix */
+#pragma omp parallel for private(i)
     for (j = 0; j < n; j++) {
         for (i = 0; i < k; i++) {
             B[i+j*k] = 10.0;
         }
     }
     /* C is m*n matrix */
+#pragma omp parallel for private(i)
     for (j = 0; j < n; j++) {
         for (i = 0; i < m; i++) {
             C[i+j*m] = 0.0;
